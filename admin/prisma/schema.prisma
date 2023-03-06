@@ -1,0 +1,68 @@
+datasource db {
+  provider = "mysql"
+  url      = env("MYSQL_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum businessType {
+  SOLE_TRADER // 개인사업자
+  FRANCHISE // 프랜차이즈
+  RESELLER // 솔루션 리셀러
+}
+
+enum tenentStatus {
+  CREATED // tenent created
+  COMPLETED // onboarding completed
+  PROVISIONED // tenent provisioned
+  SUSPENDED // payment overdue
+  DELETED // tenent deleted
+}
+
+enum userRole {
+  SUPER // super admin
+  ADMIN // admin
+  USER // user
+}
+
+enum userStatus {
+  ACTIVE // user active
+  SUSPENDED // user suspended
+  DELETED // user deleted
+}
+
+model User {
+  email         String     @unique
+  emailVerified Boolean    @default(false)
+  password      String
+  name          String
+  role          userRole
+  userStatus    userStatus @default(ACTIVE)
+  phone         String
+  phoneVerified Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  tenant        Tenent?    @relation(fields: [tenantId], references: [uuid])
+  tenantId      String?
+}
+
+model Tenent {
+  uuid         String       @id @default(uuid())
+  id           String       @unique
+  businessName String
+  businessType businessType
+  brn          String
+  ceo          String
+  cpo          String
+  address1     String
+  address2     String
+  postal       String
+  phone        String
+  email        String
+  tenentStatus tenentStatus @default(CREATED)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  User         User[]
+}
